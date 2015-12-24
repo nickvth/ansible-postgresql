@@ -34,7 +34,7 @@
   when: centos_version == "7"  
 
 - name: sync ntp to 0.nl.pool.ntp.org
-  command: "/sbin/ntpdate {{ ntpserv1 }}"
+  command: "ntpdate {{ ntpserv1 }}"
 
 - name: Started ntp
   service:
