@@ -14,8 +14,7 @@ STILL IN PROGRESS
 <b>Testing</b>
 
 - Tested PostgreSQL 9.4 DONE with pg_statsinfo 3.2.0, centos 6 and 7 
-- Tested PostgreSQL 9.3 DONE with pg_statsinfo 3.2.0, centos 6 and 7
-- Not supported PostgreSQL versions 8.4, 9.0, 9.1, 9.2 and OS centos 5
+- Not supported PostgreSQL versions 8.4, 9.0, 9.1, 9.2, 9.3 and OS centos 5
 
 
 <b>Features</b>
