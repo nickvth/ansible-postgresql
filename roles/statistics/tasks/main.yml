@@ -1,0 +1,122 @@
+---
+
+- name: Install needed dependecies
+  yum: 
+   name: "{{ item }}" 
+   state: present
+   update_cache: yes
+  with_items:
+  - httpd
+  - httpd-tools
+  - php
+  - php-pgsql
+  - php-intl
+  - php-cli 
+  - mod_ssl
+  - openssl
+
+- name: Check firewalld systemd file 
+  stat: 
+   path: /usr/lib/systemd/system/firewalld.service
+  register: check_file_result
+
+- name: Stop firewalld when exists
+  service: 
+   name: firewalld
+   state: stopped
+   enabled: no
+  when: check_file_result.stat.exists
+
+- name: Stop iptables 
+  service: 
+   name: iptables
+   state: stopped
+   enabled: no
+
+- name: Create needed directories
+  file: 
+   path: "{{ item }}" 
+   state: directory
+   mode: 0750
+  with_items:
+   - /etc/htpasswd
+   - /etc/httpd/ssl
+
+- name: Create htpasswd file
+  command: "htpasswd -mcb /etc/htpasswd/.htpasswd {{ pgreporter_user }} {{pgreporter_password}}"
+
+- name: Create selfsigned certificate
+  command: "openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -sha256 -subj '/C=NL/ST={{ state }}/L={{ city }}/O={{ organization }}/CN=pgreporter' -keyout /etc/httpd/ssl/apache.key -out /etc/httpd/ssl/apache.crt"
+
+- name: Copy SSL config
+  template: 
+   src: ssl.conf.j2
+   dest: /etc/httpd/conf.d/ssl.conf
+   mode: 0644
+  
+- name: Install needed monitoring software pg_statsinfo rhel6 and postgresql 9.4
+  yum: 
+   name: "{{ item }}" 
+   state: present
+   update_cache: yes
+  with_items:
+  - http://downloads.sourceforge.net/project/pgstatsinfo/pg_statsinfo/3.2.0/pg_statsinfo-3.2.0-1.pg94.rhel6.x86_64.rpm
+  - http://downloads.sourceforge.net/project/pgstatsinfo/pg_stats_reporter/3.2.0/pg_stats_reporter-3.2.0-1.el6.noarch.rpm
+  when: centos_version == "6" and postgresql_version == 9.4
+
+- name: Install needed monitoring software pg_statsinfo rhel7 and postgresql 9.4
+  yum: 
+   name: "{{ item }}" 
+   state: present
+   update_cache: yes
+  with_items:
+  - http://downloads.sourceforge.net/project/pgstatsinfo/pg_statsinfo/3.2.0/pg_statsinfo-3.2.0-1.pg94.rhel7.x86_64.rpm
+  - http://downloads.sourceforge.net/project/pgstatsinfo/pg_stats_reporter/3.2.0/pg_stats_reporter-3.2.0-1.el7.noarch.rpm
+  when: centos_version == "7" and postgresql_version == 9.4
+
+- name: Copy pgstatsinfo conf 
+  copy: 
+   src: pgstatsinfo-conf
+   dest: /var/lib/pgsql/pgstatsinfo-conf
+   mode: 0750
+   owner: postgres
+   group: postgres
+
+- name: add pgstatsinfo-conf to postgresql.conf and remove pgstatsinfo-conf
+  shell: "cat /var/lib/pgsql/pgstatsinfo-conf >> /var/lib/pgsql/{{ postgresql_version }}/data/postgresql.conf ; rm -f /var/lib/pgsql/pgstatsinfo-conf"
+
+- name: activate pgstatsinfo in postgresql.conf
+  replace: 
+   dest: "/var/lib/pgsql/{{ postgresql_version }}/data/postgresql.conf"
+   regexp: '#shared_preload_libraries' 
+   replace: 'shared_preload_libraries'  
+  sudo_user: postgres
+
+- name: replace hostname in pg_stats_reporter.ini
+  template: 
+   src: "pg_stats_reporter.sh.j2"
+   dest: /tmp/pg_stats_reporter.sh 
+   mode: 0755
+
+- name: execute script
+  shell: /bin/sh /tmp/pg_stats_reporter.sh ; rm -f /tmp/pg_stats_reporter.sh
+
+- name: PostgreSQL service restart
+  service: 
+   name: "postgresql-{{ postgresql_version }}" 
+   state: restarted
+
+- name: httpd service restart
+  service:
+   name: httpd
+   state: restarted
+   enabled: true
+
+- name: Notify hipchat
+  hipchat: 
+   token: "{{ hipchat_api_token }}" 
+   room: "{{ hipchat_room }}" 
+   color: purple 
+   msg_format: text 
+   msg: "Statistics PostgreSQL are intalled and configured on {{ ansible_fqdn }}"
+  when: hipchat_enabled 

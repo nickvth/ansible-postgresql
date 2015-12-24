@@ -1,0 +1,11 @@
+#------------------------------------------------------------------------------
+# pg_statsinfo
+#------------------------------------------------------------------------------
+pg_statsinfo.snapshot_interval = 30min          # set snapshot interval
+pg_statsinfo.enable_maintenance = 'on'          # enable maintenance mode('on' or 'off')
+pg_statsinfo.maintenance_time = '00:02:00'      # Delete old snapshots every day in this time.
+pg_statsinfo.repository_keepday = 30 # production use 30 days
+pg_statsinfo.syslog_min_messages = 'error'
+pg_statsinfo.textlog_line_prefix = '%t %p %c-%l %x %q(%u, %d, %r, %a) '  # This format is same as syslog's format.
+pg_statsinfo.syslog_line_prefix = '%t %p %c-%l %x %q(%u, %d, %r, %a) '   # This format is same as syslog's format.
+pg_statsinfo.excluded_dbnames = 'template0, template1'

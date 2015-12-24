@@ -1,0 +1,45 @@
+Listen 443 https
+
+{% if centos_version == "6" %}
+LoadModule ssl_module modules/mod_ssl.so
+{%  endif %}
+
+SSLSessionCache         shmcb:/run/httpd/sslcache(512000)
+SSLSessionCacheTimeout  300
+
+SSLRandomSeed startup file:/dev/urandom  256
+SSLRandomSeed connect builtin
+
+SSLCryptoDevice builtin
+
+DirectoryIndex index.html index.html.var pg_stats_reporter.php
+
+<VirtualHost {{ private_ip }}:443>
+DocumentRoot "/var/www/html/pg_stats_reporter" 
+ServerName {{ private_ip }}:443
+SSLEngine On
+SSLProtocol All -SSLv2 -SSLv3
+SSLHonorCipherOrder On
+SSLCipherSuite ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:ECDHE-RSA-DES-CBC3-SHA:ECDHE-ECDSA-DES-CBC3-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA
+SSLCertificateFile /etc/httpd/ssl/apache.crt
+SSLCertificateKeyFile /etc/httpd/ssl/apache.key
+
+<Files ~ "\.(cgi|shtml|phtml|php3?)$">
+    SSLOptions +StdEnvVars
+</Files>
+<Directory "/var/www/cgi-bin">
+    SSLOptions +StdEnvVars
+</Directory>
+
+BrowserMatch "MSIE [2-5]" \
+         nokeepalive ssl-unclean-shutdown \
+         downgrade-1.0 force-response-1.0
+
+<Location /> 
+    AuthUserFile /etc/htpasswd/.htpasswd
+    AuthName "Restricted area, only for operators"
+    AuthType Basic
+    require valid-user
+</Location> 
+
+</VirtualHost>

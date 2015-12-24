@@ -1,0 +1,5 @@
+sed -ri "s/\[sample\]/\[{{ ansible_fqdn }}\]/g" /etc/pg_stats_reporter.ini
+sed -ri "s/.*host =.*/host = {{ private_ip }}/g" /etc/pg_stats_reporter.ini
+sed -ri "s/.*port =.*/port = 5432/g" /etc/pg_stats_reporter.ini              
+sed -ri "s/.*username =.*/username = postgres/g" /etc/pg_stats_reporter.ini
+sed -ri "s/.*password =.*/password = {{ postgresql_postgres_password }}/g" /etc/pg_stats_reporter.ini

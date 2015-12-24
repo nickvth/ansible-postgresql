@@ -1,0 +1,143 @@
+---
+# Postgres related stuff
+
+- name: libselinux-python needed for installation if selinux is enabled
+  yum: 
+   name: libselinux-python 
+   state: latest
+
+- name: Install PostgreSQL repository
+  yum:
+   name: "http://yum.postgresql.org/{{ postgresql_version }}/redhat/rhel-{{ centos_version }}-x86_64/pgdg-centos{{ postgresql_pkg_version }}-{{ postgresql_version }}-1.noarch.rpm"
+   state: present
+
+- name: Install needed PostgreSQL software
+  yum: 
+   name: "{{ item }}" 
+   state: latest
+   update_cache: yes
+   enablerepo: "pgdg{{ postgresql_pkg_version }}"
+  with_items:
+  - "postgresql{{ postgresql_pkg_version }}"
+  - "postgresql{{ postgresql_pkg_version }}-server"
+  - "postgresql{{ postgresql_pkg_version }}-contrib"
+  - "postgresql{{ postgresql_pkg_version }}-jdbc"
+  - "postgresql{{ postgresql_pkg_version }}-docs"
+  - "postgresql{{ postgresql_pkg_version }}-libs"
+  - "postgresql{{ postgresql_pkg_version }}-devel"
+  - python-psycopg2
+  - cronie-anacron
+  - cronie
+  - crontabs
+
+- name: Check firewalld systemd file 
+  stat: 
+   path: /usr/lib/systemd/system/firewalld.service
+  register: check_file_result
+
+- name: Stop firewalld when exists
+  service: 
+   name: firewalld
+   state: stopped
+   enabled: no
+  when: check_file_result.stat.exists
+
+- name: Stop iptables 
+  service: 
+   name: iptables
+   state: stopped
+   enabled: no
+
+- name: PostgreSQL service is stopped
+  service: 
+   name: "postgresql-{{ postgresql_version }}"
+   state: stopped
+
+- name: PostgreSQL initialize DB configuration centos 6
+  command: /sbin/service postgresql-{{ postgresql_version }} initdb
+  when: "{{ centos_version }} == 6" 
+
+- name: PostgreSQL initialize DB configuration centos 7
+  command:  "/usr/pgsql-{{ postgresql_version }}/bin/postgresql{{ postgresql_pkg_version }}-setup initdb" 
+  when: "{{ centos_version }} == 7" 
+
+- name: PostgreSQL service started
+  service: 
+   name: "postgresql-{{ postgresql_version }}" 
+   state: started 
+   enabled: yes
+
+- name: Set postgres user password
+  postgresql_user: 
+   port: 5432
+   login_unix_socket: "/tmp"
+   login_user: "postgres"
+   name: "postgres"
+   password: "{{ postgresql_postgres_password }}"
+   role_attr_flags: SUPERUSER
+   state: present
+  sudo_user: postgres
+
+- name: Copy script to configure PostgreSQL
+  template: 
+   src: "initialize.sh.j2"  
+   dest: "/var/lib/pgsql/initialize.sh" 
+   mode: 0750
+   owner: postgres
+   group: postgres
+
+- name: Run configure PostgreSQL script
+  command: /var/lib/pgsql/initialize.sh
+
+- name: PostgreSQL service restart
+  service: 
+   name: "postgresql-{{ postgresql_version }}" 
+   state: restarted
+
+- name: Remove initialize.sh
+  shell: rm -f /var/lib/pgsql/initialize.sh
+
+- name: Create dirs for pgbackup
+  file: 
+   path: "{{ item }}" 
+   state: directory
+   owner: postgres
+   group: postgres
+   mode: 0750
+  with_items:
+   - /pgbackup
+   - /pgbackup/log
+   - /pgbackup/lock
+
+- name: Copy postgres backup script 
+  template: 
+   src: backup_postgresql.sh.j2
+   dest: /var/lib/pgsql/backup_postgresql.sh
+   mode: 0750
+   owner: postgres
+   group: postgres
+
+- name: Copy postgres incremental backup script 
+  template: 
+   src: backup_postgresql_incr.sh.j2
+   dest: /var/lib/pgsql/backup_postgresql_incr.sh
+   mode: 0750
+   owner: postgres
+   group: postgres
+
+- name: Set cron for postgres backups
+  cron: 
+   name: "PostgreSQL backup"  
+   minute: 0 
+   hour: 23
+   user: "postgres" 
+   job: "/bin/sh /var/lib/pgsql/backup_postgresql.sh -p 5432 -H {{ private_ip }}  > /dev/null 2>&1"
+
+- name: Notify hipchat
+  hipchat: 
+   token: "{{ hipchat_api_token }}" 
+   room: "{{ hipchat_room }}" 
+   color: purple 
+   msg_format: text 
+   msg: "PostgreSQL {{ postgresql_version }} is running on {{ ansible_fqdn }}"
+  when: hipchat_enabled 

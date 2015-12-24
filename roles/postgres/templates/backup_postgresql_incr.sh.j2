@@ -1,0 +1,113 @@
+#!/bin/sh
+#####################################################################################################################
+# DBP = Database Backup Postgresql                                                                                  #
+# Write Ahead Log(WAL) (archiving for postgres)                                                                     #
+# Backup script for incremental backup wal files.                                                            #
+#####################################################################################################################
+
+# After enter set -e in an interactive bash, bash will exit immediately if any command exits with non-zero
+set -e
+
+#functions that will be used
+
+printHelp() {
+    echo
+    echo "Usage: backup_postgresql_incr.sh -p<port number> -H<hostname>"
+    echo
+    echo "  -p  Port number"
+    echo "  -H  Hostname"
+    echo "  -h  this help screen"
+    echo
+    echo "Example: backup_postgresql_incr.sh -p5432 -Htestdb.example.dev"
+    echo
+}
+
+# Checks command line options (pass $@ as parameter).
+checkOptions() {
+    if [ $# -eq 0 ]; then
+        printHelp
+        exit 3
+    fi
+
+    while getopts p:H:h: OPT $@; do
+            case $OPT in
+                p) # Port number
+                   PORT="$OPTARG"
+                   ;;
+                H)# Hostname
+                   HOST="$OPTARG"
+                   ;;
+                h) printHelp
+                   exit 3
+                   ;;
+            esac
+    done
+
+     if [ -z $PORT ]; then
+                echo "Port is not set"
+                printHelp
+                exit 3
+     elif [ -z $HOST ]; then
+                echo "Hostname is not set"
+                printHelp
+                exit 3
+     fi
+}
+
+get_timestamp () {
+  date_str="`/bin/date +%d'-'%m'-'%Y`"
+  time_str="`/bin/date +%H'_'%M'_'%S`"
+  time_stamp="--> $date_str"_"$time_str <--"
+  }
+
+#function check options
+checkOptions $@
+
+#Set variables
+export PGHOST=$HOST
+export PGPORT=$PORT
+export PGWAL=wal
+export LOGDIR=/pgbackup/log/
+export BACKUP_LOG=$LOGDIR/pg_backup_log
+export BACKUPS=/pgbackup/
+export LOCK=/pgbackup/lock
+
+if [ -f $LOCK/psql_backup_in_progress_incr ]; then
+        echo "Backup already running, check $LOCK/psql_backup_in_progress_incr"
+        exit
+else
+        /bin/touch $LOCK/psql_backup_in_progress_incr
+fi
+
+# Go to default directory
+cd /var/lib/pgsql/{{ postgresql_version }}
+
+# Get timestamp from function.
+get_timestamp
+
+# Set log file and touch.
+LOGFILE=${BACKUP_LOG}_${date_str}_$time_str
+/bin/touch $LOGFILE
+
+# Delete old backup logs.
+find $BACKUP_LOG* -mtime +{{ postgresql_backup_keep }} -exec rm -f {} \;
+/bin/echo "Old backup logs are deleted" >> $LOGFILE 2>&1
+
+# Start tar of base dir and wal files
+/bin/echo "Starting tar of wal files" >> $LOGFILE 2>&1
+
+/bin/tar -cvzpf $BACKUPS/pgwals_"$date_str"_"$time_str".tgz `find $PGWAL/ -maxdepth 1 -type f` >> $LOGFILE 2>&1
+
+# Tar finished
+/bin/echo "Tar of wal files is finished" >> $LOGFILE 2>&1
+
+# Delete old wal file older then a day..
+find $PGWAL -maxdepth 1 -type f -mmin +120 -exec rm -f {} \;
+/bin/echo "Old wal files are deleted" >> $LOGFILE 2>&1
+
+# Remove lock file
+/bin/rm $LOCK/psql_backup_in_progress_incr
+/bin/echo "Lock file removed" >> $LOGFILE 2>&1
+
+# Inform log file that the script complete successfully.
+/bin/echo "Backup incremental script complete successfully" >> $LOGFILE 2>&1

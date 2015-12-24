@@ -1,0 +1,9 @@
+---
+#This playbook is to install postgresql with default configuration, nagios and pgstatsinfo monitoring
+- hosts: postgresql
+  sudo: true
+  roles:
+  - { role: ntp, tags: ntp }
+  - { role: postgres, tags: postgres }
+  - { role: statistics,  when: pgstatsinfo_enabled, tags: statistics }
+
