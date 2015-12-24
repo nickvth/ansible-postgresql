@@ -1,8 +1,5 @@
 ## This ansible playbook will install postgresql software + all dependencies on centos 
 
-
-STILL IN PROGRESS
-
 ### Requirements
  
 - [Vagrant](https://www.vagrantup.com) 1.7.4 >
