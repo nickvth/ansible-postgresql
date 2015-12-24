@@ -1,9 +1,9 @@
-* This ansible playbook will install postgresql software + all dependencies on centos *
+= This ansible playbook will install postgresql software + all dependencies on centos =
 
 
 STILL IN PROGRESS
 
-** Requirements **
+== Requirements ==
  
 - [Vagrant 1.7.4 >](https://www.vagrantup.com)
 - [Ansible 1.9.x >](http://www.ansible.com)
@@ -11,26 +11,26 @@ STILL IN PROGRESS
 - [Pgadmin for administration](http://www.pgadmin.org) 
 - More then 2gb Memory
 
-** Testing **
+== Testing ==
 
 - Tested PostgreSQL 9.4 DONE with pg_statsinfo 3.2.0, centos 6 and 7 
 - Not supported PostgreSQL versions 8.4, 9.0, 9.1, 9.2, 9.3 and OS centos 5
 
 
-** Features **
+== Features ==
 
 - PostgreSQL install with configured variables
 - [pg_statsinfo](http://sourceforge.net/projects/pgstatsinfo/?source=navbar)
 - [PostgreSQL backup script with Continuous Archiving and Point-in-Time Recovery (PITR) ](http://www.postgresql.org/docs/current/static/continuous-archiving.html)
 
 
-** ROADMAP **
+== ROADMAP ==
 - Alerting (nagios or alternative)
 - pgbouncer for connection pooling 
 - Add PostgreSQL 9.5 when official released
 - Add docker option
 
-** Vagrant instructions to test **
+== Vagrant instructions to test ==
 
 Info password for vagrant user is vagrant
 
@@ -84,7 +84,7 @@ After testing is done
 vagrant destroy 
 ```
 
-** How to use in production **
+== How to use in production ==
 
 Create inventory file and host_vars
 
