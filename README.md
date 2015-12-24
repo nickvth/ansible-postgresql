@@ -5,10 +5,10 @@ STILL IN PROGRESS
 
 ### Requirements
  
-- [Vagrant 1.7.4 >](https://www.vagrantup.com)
-- [Ansible 1.9.x >](http://www.ansible.com)
+- [Vagrant](https://www.vagrantup.com) 1.7.4 >
+- [Ansible](http://www.ansible.com) 1.9.x >
 - [VirtualBox](https://www.virtualbox.org)
-- [Pgadmin for administration](http://www.pgadmin.org) 
+- [Pgadmin](http://www.pgadmin.org) for administration
 - More then 2gb Memory
 
 ### Testing 
