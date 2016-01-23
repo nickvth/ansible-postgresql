@@ -112,6 +112,9 @@
 - name: Set setsebool for httpd to connect to DB
   command: /usr/sbin/setsebool -P httpd_can_network_connect_db 1 
 
+- name: Set setsebool for httpd unified
+  command: /usr/sbin/setsebool -P httpd_unified=1
+    
 - name: httpd service restart
   service:
    name: httpd

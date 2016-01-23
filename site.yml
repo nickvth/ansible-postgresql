@@ -11,7 +11,7 @@
      disablerepo: "*"
      enablerepo: "base,updates" 
      state: latest
-     
+
   - name: libselinux-python needed for installation if selinux is enabled
     yum: 
      name: libselinux-python 
@@ -24,7 +24,7 @@
     shell: nohup bash -c "sleep 2s && reboot" &
 
   - name: Wait for server to come back   
-    local_action: wait_for port="{{ ansible_port }}" host="{{ inventory_hostname }}" delay=10 state=started
+    local_action: wait_for port="{{ ansible_port }}" host="{{ ansible_host }}" delay=10 state=started
     sudo: false 
 
 - hosts: postgresql
