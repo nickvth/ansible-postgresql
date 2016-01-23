@@ -1,2 +1,3 @@
 [postgresql]
-host.or.ip.here ansible_ssh_port=22
+pgsqlcentos6prod
+pgsqlcentos7prod

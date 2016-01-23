@@ -1,0 +1,3 @@
+ansible_host: "set public ip here"
+ansible_port: "set port here"
+private_ip: "set private ip here"

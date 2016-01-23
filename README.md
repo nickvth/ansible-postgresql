@@ -83,20 +83,59 @@ vagrant destroy
 
 ### How to use in production
 
-Create inventory file and host_vars
+<b>Edit host_vars for production</b>
 
 ```
-
+vi host_vars/pgsqlcentos6prod or host_vars/pgsqlcentos7prod
+ansible_host: "set public ip here"
+ansible_port: "set port here"
+private_ip: "set private ip here"
 ```
 
-Create customizations file 
+<b>Create customizations file</b> 
 
 ```
+cp -rp group_vars/postgresql customizations
+vi customizations
+# Variables here are applicable to all hosts
 
+# notification 
+hipchat_enabled: false
+hipchat_api_token: [UNCONFIGURED]
+hipchat_room: [UNCONFIGURED]
+
+# centos
+centos_version: "{{ ansible_distribution_major_version }}"
+
+# postgresql vars
+postgresql_version: 9.4 # default is 9.4 (is the latest)
+postgresql_pkg_version: 94 # default is 94 (is the latest)
+postgresql_postgres_password: [UNCONFIGURED] # generate with keepass or passsafe
+postgresql_memory: 512MB # use MB, GB, TB
+postgresql_backends: 150 # normal postgresql default is 100
+postgresql_backup_keep: 3 # keep 3 days backups
+
+# statistics vars
+pgstatsinfo_enabled: true
+pgreporter_user: pgreport
+pgreporter_password: [UNCONFIGURED] 
+
+# cert vars
+state: "Zuid Holland"
+city: The Hague 
+organization: example BV
 ```
 
-Run playbook to your server(s)
+<b>Run playbook to your server(s)</b>
+
+With ssh key
 
 ```
+ansible-playbook -i inventory/prod -l [pgsqlcentos6prod or pgsqlcentos7prod] -u [username] --private-key [location ssh key] site.yml -e @customizations
+```
 
+With username and password (you need ssh-pass installed on the system)
+
+```
+ansible-playbook -i inventory/prod -l [pgsqlcentos6prod or pgsqlcentos7prod] -u [username] -k -K site.yml -e @customizations
 ```

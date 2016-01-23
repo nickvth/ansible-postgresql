@@ -1,4 +1,4 @@
 [postgresql]
-192.168.32.9 ansible_ssh_port=22
-192.168.32.10 ansible_ssh_port=22
+pgsqlcentos6test
+pgsqlcentos7test
 
