@@ -14,6 +14,7 @@
   - php-cli 
   - mod_ssl
   - openssl
+  - policycoreutils
 
 - name: Check firewalld systemd file 
   stat: 
@@ -107,6 +108,9 @@
   service: 
    name: "postgresql-{{ postgresql_version }}" 
    state: restarted
+
+- name: Set setsebool for httpd to connect to DB
+  command: /usr/sbin/setsebool -P httpd_can_network_connect_db 1 
 
 - name: httpd service restart
   service:

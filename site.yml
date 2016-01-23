@@ -1,5 +1,27 @@
 ---
 #This playbook is to install postgresql with default configuration, nagios and pgstatsinfo monitoring
+
+- hosts: postgresql
+  sudo: true
+  tasks:
+  - name: Update OS before all roles are running
+    yum: 
+     name: "*" 
+     update_cache: yes
+     disablerepo: "*"
+     enablerepo: "base,updates" 
+     state: latest
+
+  - name: set selinux on enforcing 
+    selinux: policy=targeted state=enforcing
+
+  - name: reboot host
+    shell: nohup bash -c "sleep 2s && reboot" &
+
+  - name: Wait for server to come back   
+    local_action: wait_for port="{{ ansible_port }}" host="{{ inventory_hostname }}" delay=10 state=started
+    sudo: false 
+
 - hosts: postgresql
   sudo: true
   roles:
