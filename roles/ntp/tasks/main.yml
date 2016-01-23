@@ -1,5 +1,10 @@
 ---
 
+- name: libselinux-python needed for installation if selinux is enabled
+  yum: 
+   name: libselinux-python 
+   state: latest
+
 - name: Install epel repository
   yum: 
    name: epel-release 
