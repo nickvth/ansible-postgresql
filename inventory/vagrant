@@ -1,4 +1,4 @@
 [postgresql]
-pgsqlcentos6test
-pgsqlcentos7test
+pgsqlcentos6
+pgsqlcentos7
 
