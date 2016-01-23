@@ -67,6 +67,16 @@ organization: example BV
 vagrant up 
 ```
 
+<b>When you have issues with vagrant box</b>
+
+Find latest boxes on https://atlas.hashicorp.com/boxes/search?utf8=%E2%9C%93&sort=updated&provider=&q=centos6
+
+and edit ```pgsqlcentos6.vm.box = "jhcook/centos6"``` in Vagrantfile
+
+Find latest boxes on https://atlas.hashicorp.com/boxes/search?utf8=%E2%9C%93&sort=updated&provider=&q=centos7
+
+and edit ```pgsqlcentos7.vm.box = "hfm4/centos7"``` in Vagrantfile
+
 #### Centos 6
 
 <b>PostgreSQL </b>

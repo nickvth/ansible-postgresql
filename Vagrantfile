@@ -12,7 +12,7 @@ Vagrant.configure(2) do |config|
      # Setup virtual machine box. This VM configuration code is always executed.
     
     config.vm.define "pgsqlcentos6" do |pgsqlcentos6|
-        pgsqlcentos6.vm.box = "hfm4/centos6"
+        pgsqlcentos6.vm.box = "jhcook/centos6"
         pgsqlcentos6.vm.network "private_network", ip: "192.168.32.9"
         pgsqlcentos6.vm.hostname = 'pgsqlcentos6'
         pgsqlcentos6.vm.provision "shell", inline:
