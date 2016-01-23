@@ -32,8 +32,35 @@ Info password for vagrant user is vagrant
 Create customizations file and edit [UNCONFIGURED] and other vars
 
 ```
-cp group_vars/postgresql customizations
+cp -rp group_vars/postgresql customizations
 vi customizations
+# Variables here are applicable to all hosts
+
+# notification 
+hipchat_enabled: false
+hipchat_api_token: [UNCONFIGURED]
+hipchat_room: [UNCONFIGURED]
+
+# centos
+centos_version: "{{ ansible_distribution_major_version }}"
+
+# postgresql vars
+postgresql_version: 9.4 # default is 9.4 (is the latest)
+postgresql_pkg_version: 94 # default is 94 (is the latest)
+postgresql_postgres_password: [UNCONFIGURED] # generate with keepass or passsafe
+postgresql_memory: 512MB # use MB, GB, TB
+postgresql_backends: 150 # normal postgresql default is 100
+postgresql_backup_keep: 3 # keep 3 days backups
+
+# statistics vars
+pgstatsinfo_enabled: true
+pgreporter_user: pgreport
+pgreporter_password: [UNCONFIGURED] 
+
+# cert vars
+state: "Zuid Holland"
+city: The Hague 
+organization: example BV
 ```
 
 ```
