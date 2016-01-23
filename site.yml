@@ -11,6 +11,11 @@
      disablerepo: "*"
      enablerepo: "base,updates" 
      state: latest
+     
+  - name: libselinux-python needed for installation if selinux is enabled
+    yum: 
+     name: libselinux-python 
+     state: present
 
   - name: set selinux on enforcing 
     selinux: policy=targeted state=enforcing

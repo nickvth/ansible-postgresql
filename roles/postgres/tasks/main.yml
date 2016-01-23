@@ -4,7 +4,7 @@
 - name: libselinux-python needed for installation if selinux is enabled
   yum: 
    name: libselinux-python 
-   state: latest
+   state: present
 
 - name: Install PostgreSQL repository
   yum:
