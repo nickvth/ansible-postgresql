@@ -15,11 +15,12 @@
 
 ### Features
 
+- Selinux enabled
 - PostgreSQL install with configured variables
 - [pg_statsinfo](http://sourceforge.net/projects/pgstatsinfo/?source=navbar)
 - [PostgreSQL backup script with Continuous Archiving and Point-in-Time Recovery (PITR) ](http://www.postgresql.org/docs/current/static/continuous-archiving.html)
 
-### ROADMAP
+### Roadmap
 - Alerting (nagios or alternative)
 - pgbouncer for connection pooling 
 - Add PostgreSQL 9.5 when official released
