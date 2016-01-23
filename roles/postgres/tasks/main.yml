@@ -55,11 +55,15 @@
 
 - name: PostgreSQL initialize DB configuration centos 6
   command: /sbin/service postgresql-{{ postgresql_version }} initdb
-  when: "{{ centos_version }} == 6" 
+  args:
+   creates: "/var/lib/pgsql/{{ postgresql_version }}/data/postgresql.conf"
+  when: "{{ centos_version }} == 6"
 
 - name: PostgreSQL initialize DB configuration centos 7
   command:  "/usr/pgsql-{{ postgresql_version }}/bin/postgresql{{ postgresql_pkg_version }}-setup initdb" 
-  when: "{{ centos_version }} == 7" 
+  args:
+   creates: "/var/lib/pgsql/{{ postgresql_version }}/data/postgresql.conf"
+  when: "{{ centos_version }} == 7"
 
 - name: PostgreSQL service started
   service: 
