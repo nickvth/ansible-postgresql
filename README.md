@@ -106,11 +106,65 @@ psql -h 192.168.32.10 -p 5432 -U postgres
 https://192.168.32.10/
 ```
 
-Go into the vm with ssh to check if everything is healthy
+<b>Go into the vm with ssh to check if everything is healthy</b>
 
 ```
 vagrant ssh pgsqlcentos6 
 vagrant ssh pgsqlcentos7
+```
+
+Wait for first pg_statsinfo snapshot or create manualy
+
+pg_statsinfo.snapshot_interval = 30 min  
+
+Create 2 or more snapshots manualy
+
+```
+# su - postgres
+$ psql -d postgres -c "SELECT statsinfo.snapshot('testsnap')"
+```
+
+Check webinterface pg_reporter if there are snapshots available
+
+Backup check 
+
+```
+# su - postgres
+Last login: Sun Jan 24 10:44:29 CET 2016 on pts/0
+-bash-4.2$ /bin/sh /var/lib/pgsql/backup_postgresql.sh -p 5432 -H 192.168.32.10
+-bash-4.2$ cd /pgbackup/
+-bash-4.2$ ls
+lock  log  pgbackup_24-01-2016_10_45_05.tgz  pgwals_24-01-2016_10_45_05.tgz
+-bash-4.2$ ls -ltrh
+total 8.9M
+drwxr-x---. 2 postgres postgres   46 Jan 24 10:45 log
+-rw-r--r--. 1 postgres postgres 3.4M Jan 24 10:45 pgbackup_24-01-2016_10_45_05.tgz
+-rw-r--r--. 1 postgres postgres 5.5M Jan 24 10:45 pgwals_24-01-2016_10_45_05.tgz
+drwxr-x---. 2 postgres postgres    6 Jan 24 10:45 lock
+-bash-4.2$ cd log/
+-bash-4.2$ ls
+pg_backup_log_24-01-2016_10_45_05
+-bash-4.2$ cat pg_backup_log_24-01-2016_10_45_05 
+Old backup logs are deleted
+Start Hot Backup
+ pg_start_backup 
+-----------------
+ 0/7000028
+(1 row)
+
+Starting tar of base dir and wal files
+data/
+data/global/
+data/global/pg_control
+data/global/pg_filenode.map
+data/global/12798
+data/global/12800
+data/global/12801
+data/global/12932
+data/global/12934
+data/global/12936
+data/global/12937
+data/global/12938
 ```
 
 After testing is done
